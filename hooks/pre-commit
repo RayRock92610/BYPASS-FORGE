@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+./scripts/ci/witch_gate.sh
+./scripts/ci/context_budget.sh
