@@ -2,3 +2,15 @@
 go/
 .cache/
 
+Candyland/
+Skills/
+bug-hunt/
+github_repos_checkout/
+kessel_repro/
+rockberry-pi/
+skills-repo/
+tree-sitter-bash/
+ubuntu-in-termux/
+vrp-audit-labs/
+*.db
+*.html
