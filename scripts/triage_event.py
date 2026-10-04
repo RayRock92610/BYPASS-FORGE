@@ -44,20 +44,32 @@ def main():
 
     # Determine if it's an issue or PR
     body = ""
-    if "issue" in event_data and "body" in event_data["issue"]:
-        body = event_data["issue"]["body"] or ""
-    elif "pull_request" in event_data and "body" in event_data["pull_request"]:
-        body = event_data["pull_request"]["body"] or ""
+    title = ""
+    branch = ""
+
+    if "issue" in event_data:
+        body = event_data["issue"].get("body", "") or ""
+        title = event_data["issue"].get("title", "") or ""
+    elif "pull_request" in event_data:
+        body = event_data["pull_request"].get("body", "") or ""
+        title = event_data["pull_request"].get("title", "") or ""
+        branch = event_data["pull_request"].get("head", {}).get("ref", "") or ""
     else:
-        diagnostic = {"error": "No issue or pull_request body found in event data."}
+        diagnostic = {"error": "No issue or pull_request data found in event."}
         print(json.dumps(diagnostic))
         sys.exit(1)
 
+    # Sanitize all incoming fields
     sanitized_body = sanitize_input(body)
+    sanitized_title = sanitize_input(title)
+    sanitized_branch = sanitize_input(branch)
+
     metadata = extract_metadata(sanitized_body)
 
     context = {
         "sanitized_body": sanitized_body,
+        "sanitized_title": sanitized_title,
+        "sanitized_branch": sanitized_branch,
         "metadata": metadata
     }
 

@@ -52,7 +52,7 @@ verify_admin() {
     clear
     echo -e "${RED}[!] SYSTEM ENCRYPTED${NC}"
     echo -ne "${ORANGE}[?] ENTER ALPHA KEY: ${NC}"
-    read input_key
+    read -r input_key
     if [[ "$input_key" != "$ALPHA_KEY" ]]; then
         echo -e "${RED}[!] ACCESS DENIED. SCRUBBING SESSION.${NC}"
         history -c && exit 1
@@ -61,7 +61,7 @@ verify_admin() {
 }
 
 init_mission() {
-    local cid="$(date -u +%Y%m%dT%H%M%SZ)_KFB1_${1//./_}"
+    local cid; cid="$(date -u +%Y%m%dT%H%M%SZ)_KFB1_${1//./_}"
     mkdir -p "$CASE_ROOT/$cid"/{intake,zoo_crew_outputs,hashes}
     sqlite3 "$DB_PATH" "INSERT INTO missions (id, target) VALUES ('$cid', '$1');"
     echo "$cid"
@@ -81,14 +81,14 @@ deploy_ghost() {
 deploy_strikeforce() {
     local cid=$1
     echo -ne "${ORANGE}[?] ENTER OMEGA KEY TO RELEASE ZOO CREW: ${NC}"
-    read o_key
+    read -r o_key
     [[ "$o_key" != "$OMEGA_KEY" ]] && return 0
     
     echo -e "${RED}[*] AGENT INQUISITOR: Probing for API/Auth Leaks...${NC}"
     while read -r target; do
         [[ -z "$target" ]] && continue
         vlog "Probing: $target"
-        local header=$(curl -IsL --connect-timeout 2 --max-time 3 -A "$UA" "$target" 2>/dev/null | grep -Ei "Set-Cookie|Authorization|API-Key" | tr -d '\r' | tr '\n' ' ')
+        local header; header=$(curl -IsL --connect-timeout 2 --max-time 3 -A "$UA" "$target" 2>/dev/null | grep -Ei "Set-Cookie|Authorization|API-Key" | tr -d '\r' | tr '\n' ' ')
         if [[ -n "$header" ]]; then
             sqlite3 "$DB_PATH" "INSERT INTO findings (mission_id, agent, url, data) VALUES ('$cid', 'INQUISITOR', '$target', '$header');"
         fi
@@ -111,7 +111,7 @@ main() {
     fi
     init_db
     verify_admin
-    local CID=$(init_mission "$1")
+    local CID; CID=$(init_mission "$1")
     deploy_ghost "$CID" "$1"
     deploy_strikeforce "$CID"
     deploy_bones "$CID"

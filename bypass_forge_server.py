@@ -22,9 +22,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import json, urllib.request, urllib.error, threading, time, ssl, os, re, hashlib
+import hashlib
+import json
+import os
+import re
+import ssl
+import threading
+import time
+import urllib.error
+import urllib.request
 from collections import defaultdict
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 
 ssl_ctx = ssl.create_default_context()
@@ -148,7 +156,7 @@ def fire_technique(target_url, tech, timeout=8):
     except urllib.error.HTTPError as e:
         code   = e.code
         length = 0
-    except Exception:
+    except urllib.error.URLError:
         code   = 0
         length = 0
     result = sign_finding({
@@ -219,7 +227,7 @@ class ForgeHandler(BaseHTTPRequestHandler):
         if self.path == "/fire":
             length = int(self.headers.get("Content-Length", 0))
             try: body = json.loads(self.rfile.read(length))
-            except: self._json({"error": "Invalid JSON"}, 400); return
+            except urllib.error.URLError: self._json({"error": "Invalid JSON"}, 400); return
             raw_url = body.get("url", "")
             url, err = sanitize_url(raw_url)
             if err: self._json({"error": err}, 400); return
@@ -240,7 +248,7 @@ class ForgeHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", 7444), ForgeHandler)
     print(f"[BYPASS-FORGE] v3 | callsign={CALLSIGN}")
-    print(f"[BYPASS-FORGE] http://127.0.0.1:7444")
+    print("[BYPASS-FORGE] http://127.0.0.1:7444")
     print(f"[BYPASS-FORGE] {len(BYPASS_TECHNIQUES)} techniques loaded")
 
     server.serve_forever()

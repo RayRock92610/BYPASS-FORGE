@@ -1,0 +1,46 @@
+name: Jules Task Report
+description: Create a task for Jules (Automated Execution Engine) to implement or fix a bypass module.
+title: "[JULES]: "
+labels: ["triage:automated", "agent:jules", "status:ready-for-execution"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Jules Execution Task
+        Please provide clear, actionable instructions for the AI execution engine.
+  - type: dropdown
+    id: target_category
+    attributes:
+      label: Target Category
+      description: Select the vulnerability category this task relates to.
+      options:
+        - Header Injection
+        - Path Traversal
+        - Verb Tampering
+        - Unicode Normalization
+        - Other (specify in description)
+    validations:
+      required: true
+  - type: textarea
+    id: expected_payload
+    attributes:
+      label: Expected Bypass Payload / Technique
+      description: What is the expected behavior, generated payload, or bypass string?
+      placeholder: e.g. %c0%ae%c0%ae/
+    validations:
+      required: true
+  - type: textarea
+    id: actual_payload
+    attributes:
+      label: Actual Bypass Payload / Behavior
+      description: What is currently happening instead? Leave blank if this is a new module request.
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Termux Reproduction Steps
+      description: Provide the exact commands to run on Termux to reproduce or verify this task.
+      placeholder: |
+        1. ./kfb1.sh --test header_inj
+        2. ...
+    validations:
+      required: true
