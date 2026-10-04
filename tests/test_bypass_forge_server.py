@@ -1,7 +1,7 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 import urllib.error
 
-from bypass_forge_server import classify, fire_technique, findings
+from bypass_forge_server import classify, findings, fire_technique
 
 
 def test_classify():
@@ -49,7 +49,7 @@ def test_fire_technique_success(mock_urlopen):
     assert "ts" in result
     assert "sig" in result
 
-    args, kwargs = mock_urlopen.call_args
+    args, _kwargs = mock_urlopen.call_args
     req = args[0]
     assert req.full_url == "http://example.com/path?test=1"
     assert req.method == "GET"
@@ -72,7 +72,7 @@ def test_fire_technique_header(mock_urlopen):
     assert result["verdict"] == "BLOCKED"
     assert result["method"] == "GET"
 
-    args, kwargs = mock_urlopen.call_args
+    args, _kwargs = mock_urlopen.call_args
     req = args[0]
     assert req.get_header("X-forwarded-for") == "127.0.0.1"
 
@@ -94,7 +94,7 @@ def test_fire_technique_verb(mock_urlopen):
     assert result["verdict"] == "NOT_FOUND"
     assert result["method"] == "POST"
 
-    args, kwargs = mock_urlopen.call_args
+    args, _kwargs = mock_urlopen.call_args
     req = args[0]
     assert req.method == "POST"
 
