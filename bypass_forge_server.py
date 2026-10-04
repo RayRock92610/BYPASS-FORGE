@@ -156,7 +156,7 @@ def fire_technique(target_url, tech, timeout=8):
     except urllib.error.HTTPError as e:
         code   = e.code
         length = 0
-    except Exception:
+    except urllib.error.URLError:
         code   = 0
         length = 0
     result = sign_finding({
@@ -227,7 +227,7 @@ class ForgeHandler(BaseHTTPRequestHandler):
         if self.path == "/fire":
             length = int(self.headers.get("Content-Length", 0))
             try: body = json.loads(self.rfile.read(length))
-            except Exception: self._json({"error": "Invalid JSON"}, 400); return
+            except urllib.error.URLError: self._json({"error": "Invalid JSON"}, 400); return
             raw_url = body.get("url", "")
             url, err = sanitize_url(raw_url)
             if err: self._json({"error": err}, 400); return
