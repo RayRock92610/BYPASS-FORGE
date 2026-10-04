@@ -1,7 +1,7 @@
 import json
 import os
-import sys
 import re
+import sys
 
 
 def sanitize_input(text):
@@ -41,7 +41,7 @@ def main():
     try:
         with open(event_path, "r") as f:
             event_data = json.load(f)
-    except Exception:
+    except (json.JSONDecodeError, OSError):
         diagnostic = {"error": "Invalid JSON in GITHUB_EVENT_PATH."}
         print(json.dumps(diagnostic))
         sys.exit(1)
