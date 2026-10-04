@@ -1,5 +1,6 @@
 from bypass_forge_server import classify
 
+
 def test_classify():
     assert classify(200) == "BYPASS"
     assert classify(301) == "REDIRECT"
