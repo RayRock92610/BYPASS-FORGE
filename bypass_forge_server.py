@@ -36,8 +36,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 
 ssl_ctx = ssl.create_default_context()
-ssl_ctx.check_hostname = False
-ssl_ctx.verify_mode = ssl.CERT_NONE
+ssl_ctx.check_hostname = True
+ssl_ctx.verify_mode = ssl.CERT_REQUIRED
 
 ALLOWED_ORIGIN  = "http://127.0.0.1:8080"
 RATE_LIMIT_REQ  = 20
@@ -195,7 +195,9 @@ class ForgeHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         origin = self.headers.get("Origin", "")
         if origin != ALLOWED_ORIGIN:
-            self.send_response(403); self.end_headers(); return
+            self.send_response(403)
+            self.end_headers()
+            return
         self.send_response(200)
         self._cors()
         self.end_headers()
@@ -227,7 +229,9 @@ class ForgeHandler(BaseHTTPRequestHandler):
         if self.path == "/fire":
             length = int(self.headers.get("Content-Length", 0))
             try: body = json.loads(self.rfile.read(length))
-            except urllib.error.URLError: self._json({"error": "Invalid JSON"}, 400); return
+            except urllib.error.URLError:
+                self._json({"error": "Invalid JSON"}, 400)
+                return
             raw_url = body.get("url", "")
             url, err = sanitize_url(raw_url)
             if err: self._json({"error": err}, 400); return
