@@ -1,4 +1,4 @@
-from bypass_forge_server import validate_techniques, BYPASS_TECHNIQUES
+from bypass_forge_server import BYPASS_TECHNIQUES, validate_techniques
 
 def test_validate_techniques_valid():
     # Take a few known valid IDs
