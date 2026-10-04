@@ -1,5 +1,4 @@
-import pytest
-from bypass_forge_server import sanitize_url, MAX_URL_LEN
+from bypass_forge_server import MAX_URL_LEN, sanitize_url
 
 def test_sanitize_url_empty_or_too_long():
     url, err = sanitize_url("")
