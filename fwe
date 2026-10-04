@@ -67,7 +67,8 @@ if __name__ == "__main__":
 
     try:
         score = float(sys.argv[1])
-    except:
+    except Exception as err:
+        raise ValueError("Invalid score.") from err
         _halt("Invalid score.")
 
     raw_input = sys.stdin.read().strip() if not sys.stdin.isatty() else " ".join(sys.argv[2:])

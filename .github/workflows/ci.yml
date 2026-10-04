@@ -29,8 +29,12 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get install -y shellcheck
         find . -name "*.sh" -type f -exec shellcheck {} +
-        # Also run on 'fwe' as it seems to be a shell script based on the task description or its name
-        if [ -f "fwe" ] && head -n 1 "fwe" | grep -q 'sh\|bash'; then shellcheck fwe; fi
+        if [ -f "fwe" ]; then
+          first_line=$(head -n 1 "fwe" || true)
+          if echo "$first_line" | grep -qE '^#!.*\\b(sh|bash)\\b'; then
+            shellcheck fwe
+          fi
+        fi
 
     - name: Lint with Ruff / Flake8
       run: |
