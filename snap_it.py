@@ -31,7 +31,7 @@ from pathlib import Path
 def capture_local(source_file):
     # 1. Logic Gate: Find the browser
     chrome_path = shutil.which("chromium") or shutil.which("chromium-browser")
-    
+
     if not chrome_path:
         print("[!] Error: Chromium not found. Run: pkg install chromium")
         return
@@ -44,8 +44,8 @@ def capture_local(source_file):
     output_dir.mkdir(parents=True, exist_ok=True)
     out_path = output_dir.absolute() / f"{Path(source_file).stem}.png"
 
-    with open(source_file, 'r') as f:
-        code = f.read().replace('<', '&lt;').replace('>', '&gt;')
+    with open(source_file, "r") as f:
+        code = f.read().replace("<", "&lt;").replace(">", "&gt;")
 
     html_path = output_dir / "temp.html"
     html_content = f"""
@@ -57,7 +57,7 @@ def capture_local(source_file):
     </body>
     </html>
     """
-    with open(html_path, 'w') as f:
+    with open(html_path, "w") as f:
         f.write(html_content)
 
     print(f"[*] Dragon-Forge: Using {chrome_path}")
@@ -70,16 +70,18 @@ def capture_local(source_file):
         "--no-sandbox",
         f"--screenshot={out_path}",
         "--window-size=1280,720",
-        "--virtual-time-budget=10000", # Gives time for styles to load
-        str(html_path.absolute())
+        "--virtual-time-budget=10000",  # Gives time for styles to load
+        str(html_path.absolute()),
     ]
 
     try:
         subprocess.run(cmd, check=True, capture_output=True)
         print(f"[+] SUCCESS: Image deployed to {out_path}")
-        if os.path.exists(html_path): os.remove(html_path)
+        if os.path.exists(html_path):
+            os.remove(html_path)
     except subprocess.CalledProcessError as e:
         print(f"[!] Forge Failed: {e.stderr.decode()}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

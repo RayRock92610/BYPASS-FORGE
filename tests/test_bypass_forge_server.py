@@ -1,5 +1,5 @@
-
 from bypass_forge_server import classify
+
 
 def test_classify():
     # BYPASS
