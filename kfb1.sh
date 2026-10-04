@@ -35,8 +35,8 @@ NC='\033[0m'
 set -e
 
 # --- CONFIG & PATHS ---
-ALPHA_KEY="1987"
-OMEGA_KEY="7891"
+# ALPHA_KEY must be set in environment
+# OMEGA_KEY must be set in environment
 DB_PATH="$HOME/kessel-flow-system/data/kessel_vault.db"
 CASE_ROOT="$HOME/forensic-cases"
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -104,6 +104,10 @@ deploy_bones() {
 }
 
 main() {
+    if [[ -z "$ALPHA_KEY" ]] || [[ -z "$OMEGA_KEY" ]]; then
+        echo -e "${RED}[!] ERROR: ALPHA_KEY and OMEGA_KEY environment variables must be set.${NC}"
+        exit 1
+    fi
     if [[ $# -lt 1 ]]; then
         echo -e "${RED}[!] ERROR: TARGET REQUIRED${NC}"
         echo -e "${ORANGE}Usage: ./kfb1.sh <target.com>${NC}"
