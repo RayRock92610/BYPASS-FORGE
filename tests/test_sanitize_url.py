@@ -1,5 +1,6 @@
 from bypass_forge_server import MAX_URL_LEN, sanitize_url
 
+
 def test_sanitize_url_empty_or_too_long():
     url, err = sanitize_url("")
     assert url is None
