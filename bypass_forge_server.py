@@ -192,15 +192,22 @@ class ForgeHandler(BaseHTTPRequestHandler):
             self._json({"error": "Rate limit exceeded"}, 429)
             return False
         return True
+
+    def _check_origin(self):
+        return self.headers.get("Origin", "") == ALLOWED_ORIGIN
+
     def do_OPTIONS(self):
-        origin = self.headers.get("Origin", "")
-        if origin != ALLOWED_ORIGIN:
-            self.send_response(403); self.end_headers(); return
+        if not self._check_origin():
+            self.send_response(403)
+            self.end_headers()
+            return
         self.send_response(200)
         self._cors()
         self.end_headers()
+
     def do_GET(self):
-        if not self._rate_gate(): return
+        if not self._rate_gate():
+            return
         if self.path == "/techniques":
             self._json(BYPASS_TECHNIQUES)
         elif self.path == "/findings":
@@ -218,12 +225,15 @@ class ForgeHandler(BaseHTTPRequestHandler):
             self._json({"status":"ok","callsign":CALLSIGN,
                         "techniques":len(BYPASS_TECHNIQUES)})
         else:
-            self.send_response(404); self.end_headers()
+            self.send_response(404)
+            self.end_headers()
+
     def do_POST(self):
-        if not self._rate_gate(): return
-        origin = self.headers.get("Origin", "")
-        if origin != ALLOWED_ORIGIN:
-            self._json({"error": "Forbidden"}, 403); return
+        if not self._rate_gate():
+            return
+        if not self._check_origin():
+            self._json({"error": "Forbidden"}, 403)
+            return
         if self.path == "/fire":
             length = int(self.headers.get("Content-Length", 0))
             try: body = json.loads(self.rfile.read(length))
@@ -243,7 +253,8 @@ class ForgeHandler(BaseHTTPRequestHandler):
             with findings_lock: findings.clear()
             self._json({"status": "cleared"})
         else:
-            self.send_response(404); self.end_headers()
+            self.send_response(404)
+            self.end_headers()
 
 if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", 7444), ForgeHandler)
