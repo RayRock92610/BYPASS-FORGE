@@ -8,7 +8,7 @@ def sanitize_input(text):
     if not isinstance(text, str):
         return ""
     # Remove potentially dangerous shell injection characters
-    return re.sub(r'[;&|`$<>\\*?{}[\]!]', '', text)
+    return re.sub(r"[;&|`$<>\\*?{}[\]!]", "", text)
 
 
 def extract_metadata(body):
@@ -16,7 +16,7 @@ def extract_metadata(body):
         "header_injection": False,
         "path_traversal": False,
         "verb_tampering": False,
-        "protocol_smuggling": False
+        "protocol_smuggling": False,
     }
     body_lower = body.lower()
     if "header injection" in body_lower:
@@ -61,10 +61,7 @@ def main():
     sanitized_body = sanitize_input(body)
     metadata = extract_metadata(sanitized_body)
 
-    context = {
-        "sanitized_body": sanitized_body,
-        "metadata": metadata
-    }
+    context = {"sanitized_body": sanitized_body, "metadata": metadata}
 
     print(json.dumps(context))
     sys.exit(0)

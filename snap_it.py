@@ -36,8 +36,8 @@ def find_browser():
 
 def generate_html(source_file, output_dir):
     """Generates the HTML file containing the code."""
-    with open(source_file, 'r') as f:
-        code = f.read().replace('<', '&lt;').replace('>', '&gt;')
+    with open(source_file, "r") as f:
+        code = f.read().replace("<", "&lt;").replace(">", "&gt;")
 
     html_path = output_dir / "temp.html"
     html_content = f"""
@@ -49,7 +49,7 @@ def generate_html(source_file, output_dir):
     </body>
     </html>
     """
-    with open(html_path, 'w') as f:
+    with open(html_path, "w") as f:
         f.write(html_content)
 
     return html_path

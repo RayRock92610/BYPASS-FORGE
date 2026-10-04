@@ -9,6 +9,7 @@ from bypass_forge_server import RATE_LIMIT_REQ, RATE_LIMIT_WIN, rate_check, rate
 def reset_rate_table():
     rate_table.clear()
 
+
 def test_rate_check_under_limit():
     ip = "127.0.0.1"
     # Make requests up to RATE_LIMIT_REQ - 1
@@ -18,6 +19,7 @@ def test_rate_check_under_limit():
     # Should still be under limit
     assert len(rate_table[ip]) == RATE_LIMIT_REQ - 1
 
+
 def test_rate_check_exceed_limit():
     ip = "127.0.0.2"
     # Make requests up to RATE_LIMIT_REQ
@@ -26,6 +28,7 @@ def test_rate_check_exceed_limit():
 
     # Next request should fail
     assert not rate_check(ip)
+
 
 def test_rate_check_sliding_window():
     ip = "127.0.0.3"
@@ -43,6 +46,7 @@ def test_rate_check_sliding_window():
         # Window expired, should be able to make requests again
         assert rate_check(ip)
         assert len(rate_table[ip]) == 1
+
 
 def test_rate_check_independent_ips():
     ip1 = "127.0.0.4"
