@@ -26,11 +26,13 @@ import os
 import re
 import sys
 from dataclasses import dataclass, field
-from typing import Any, NoReturn
+from typing import NoReturn
+
 
 def _halt(msg: str) -> NoReturn:
     sys.stderr.write(f"\033[91m[FWE_ERROR] {msg}\033[0m\n")
     sys.exit(1)
+
 
 @dataclass(frozen=True)
 class FWEConfig:
@@ -38,6 +40,7 @@ class FWEConfig:
     agreeability_weight: float = -2.0
     confidence_threshold: float = 1.0
     secret: str = field(default_factory=lambda: os.getenv("FWE_SECRET", "").strip())
+
 
 class FWEEngine:
     def __init__(self, config: FWEConfig):
@@ -49,7 +52,7 @@ class FWEEngine:
         if not s:
             _halt("FWE_SECRET is empty or unset.")
         if len(s) < 24:
-            _halt(f"FWE_SECRET entropy too low.")
+            _halt("FWE_SECRET entropy too low.")
         if not re.fullmatch(r"[A-Za-z0-9_]+", s):
             _halt("FWE_SECRET contains forbidden characters.")
         if self.config.confidence_threshold != 1.0:
@@ -60,6 +63,7 @@ class FWEEngine:
             return "I DON'T KNOW."
         return data
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: echo 'data' | fwe <confidence_score>")
@@ -67,11 +71,13 @@ if __name__ == "__main__":
 
     try:
         score = float(sys.argv[1])
-    except:
+    except ValueError:
         _halt("Invalid score.")
 
-    raw_input = sys.stdin.read().strip() if not sys.stdin.isatty() else " ".join(sys.argv[2:])
-    
+    raw_input = (
+        sys.stdin.read().strip() if not sys.stdin.isatty() else " ".join(sys.argv[2:])
+    )
+
     if not raw_input:
         _halt("No input data.")
 
