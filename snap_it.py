@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import os
+import shlex
 import shutil
 import subprocess
-import shlex
 import sys
 from pathlib import Path
 
