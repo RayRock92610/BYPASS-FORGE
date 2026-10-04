@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+import os
+import shutil
 import subprocess
 
 # MIT License
@@ -21,11 +24,9 @@ import subprocess
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 import sys
-import os
-import shutil
 from pathlib import Path
+
 
 def capture_local(source_file):
     # 1. Logic Gate: Find the browser
