@@ -116,9 +116,10 @@ def sanitize_url(url):
     url = re.sub(r'[\x00-\x1f\x7f]', '', url)
     return url, None
 
+VALID_TECHNIQUES_IDS = {t["id"] for t in BYPASS_TECHNIQUES}
+
 def validate_techniques(ids):
-    valid = {t["id"] for t in BYPASS_TECHNIQUES}
-    return [i for i in ids if i in valid]
+    return [i for i in ids if i in VALID_TECHNIQUES_IDS]
 
 def classify(code):
     if code == 200:               return "BYPASS"
