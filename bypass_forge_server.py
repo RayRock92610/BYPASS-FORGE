@@ -35,9 +35,10 @@ from collections import defaultdict
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 
-ssl_ctx = ssl.create_default_context()
-ssl_ctx.check_hostname = False
-ssl_ctx.verify_mode = ssl.CERT_NONE
+ssl_ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+ssl_ctx.check_hostname = True
+ssl_ctx.verify_mode = ssl.CERT_REQUIRED
+ssl_ctx.load_default_certs()
 
 ALLOWED_ORIGIN  = "http://127.0.0.1:8080"
 RATE_LIMIT_REQ  = 20
@@ -116,17 +117,24 @@ def sanitize_url(url):
     url = re.sub(r'[\x00-\x1f\x7f]', '', url)
     return url, None
 
+VALID_TECHNIQUES_IDS = {t["id"] for t in BYPASS_TECHNIQUES}
+
 def validate_techniques(ids):
-    valid = {t["id"] for t in BYPASS_TECHNIQUES}
-    return [i for i in ids if i in valid]
+    return [i for i in ids if i in VALID_TECHNIQUES_IDS]
 
 def classify(code):
-    if code == 200:               return "BYPASS"
-    if code in [301,302,307,308]: return "REDIRECT"
-    if code == 401:               return "AUTH"
-    if code == 403:               return "BLOCKED"
-    if code == 404:               return "NOT_FOUND"
-    if code == 500:               return "SERVER_ERR"
+    if code == 200:
+        return "BYPASS"
+    if code in [301,302,307,308]:
+        return "REDIRECT"
+    if code == 401:
+        return "AUTH"
+    if code == 403:
+        return "BLOCKED"
+    if code == 404:
+        return "NOT_FOUND"
+    if code == 500:
+        return "SERVER_ERR"
     return "OTHER"
 
 def fire_technique(target_url, tech, timeout=8):
@@ -167,6 +175,7 @@ def fire_technique(target_url, tech, timeout=8):
         "verdict": classify(code), "bytes": length,
     })
     with findings_lock:
+
         findings.append(result)
     return result
 
@@ -195,55 +204,74 @@ class ForgeHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         origin = self.headers.get("Origin", "")
         if origin != ALLOWED_ORIGIN:
-            self.send_response(403); self.end_headers(); return
+            self.send_response(403)
+            self.end_headers()
+            return
         self.send_response(200)
         self._cors()
         self.end_headers()
     def do_GET(self):
-        if not self._rate_gate(): return
+        if not self._rate_gate():
+            return
         if self.path == "/techniques":
             self._json(BYPASS_TECHNIQUES)
         elif self.path == "/findings":
-            with findings_lock: self._json(findings)
+            with findings_lock:
+                self._json(findings)
         elif self.path == "/findings/export":
-            with findings_lock: data = json.dumps(findings, indent=2)
+            with findings_lock:
+                data = json.dumps(findings, indent=2)
             ts = time.strftime("%Y%m%d_%H%M%S")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Disposition",
                 f"attachment; filename=forge_{CALLSIGN}_{ts}.json")
-            self._cors(); self.end_headers()
+            self._cors()
+            self.end_headers()
             self.wfile.write(data.encode())
         elif self.path == "/health":
             self._json({"status":"ok","callsign":CALLSIGN,
                         "techniques":len(BYPASS_TECHNIQUES)})
         else:
-            self.send_response(404); self.end_headers()
+            self.send_response(404)
+            self.end_headers()
     def do_POST(self):
-        if not self._rate_gate(): return
+        if not self._rate_gate():
+            return
         origin = self.headers.get("Origin", "")
         if origin != ALLOWED_ORIGIN:
-            self._json({"error": "Forbidden"}, 403); return
+            self._json({"error": "Forbidden"}, 403)
+            return
         if self.path == "/fire":
             length = int(self.headers.get("Content-Length", 0))
-            try: body = json.loads(self.rfile.read(length))
-            except urllib.error.URLError: self._json({"error": "Invalid JSON"}, 400); return
+            try:
+                body = json.loads(self.rfile.read(length))
+            except urllib.error.URLError:
+                self._json({"error": "Invalid JSON"}, 400)
+                return
             raw_url = body.get("url", "")
             url, err = sanitize_url(raw_url)
-            if err: self._json({"error": err}, 400); return
+            if err:
+                self._json({"error": err}, 400)
+                return
             raw_ids  = body.get("techniques", [t["id"] for t in BYPASS_TECHNIQUES])
             safe_ids = validate_techniques(raw_ids)
-            if not safe_ids: self._json({"error": "No valid techniques"}, 400); return
+            if not safe_ids:
+                self._json({"error": "No valid techniques"}, 400)
+                return
             techs = [t for t in BYPASS_TECHNIQUES if t["id"] in safe_ids]
             def run():
-                for tech in techs: fire_technique(url, tech)
+                for tech in techs:
+                    fire_technique(url, tech)
             threading.Thread(target=run, daemon=True).start()
             self._json({"status":"firing","count":len(techs),"callsign":CALLSIGN})
         elif self.path == "/findings/clear":
-            with findings_lock: findings.clear()
+            with findings_lock:
+                findings.clear()
             self._json({"status": "cleared"})
         else:
-            self.send_response(404); self.end_headers()
+            self.send_response(404)
+            self.end_headers()
 
 if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", 7444), ForgeHandler)

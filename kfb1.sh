@@ -63,7 +63,14 @@ verify_admin() {
 init_mission() {
     local cid; cid="$(date -u +%Y%m%dT%H%M%SZ)_KFB1_${1//./_}"
     mkdir -p "$CASE_ROOT/$cid"/{intake,zoo_crew_outputs,hashes}
-    sqlite3 "$DB_PATH" "INSERT INTO missions (id, target) VALUES ('$cid', '$1');"
+    python3 -c '
+import sqlite3, sys
+try:
+    with sqlite3.connect(sys.argv[1]) as conn:
+        conn.execute("INSERT INTO missions (id, target) VALUES (?, ?)", (sys.argv[2], sys.argv[3]))
+except Exception as err:
+    raise RuntimeError("Failed to insert mission") from err
+' "$DB_PATH" "$cid" "$1"
     echo "$cid"
 }
 
@@ -87,10 +94,21 @@ deploy_strikeforce() {
     echo -e "${RED}[*] AGENT INQUISITOR: Probing for API/Auth Leaks...${NC}"
     while read -r target; do
         [[ -z "$target" ]] && continue
+        # Validate target is a URL or domain/IP syntax to prevent command injection
+        if [[ ! "$target" =~ ^[a-zA-Z0-9.:/_-]+$ ]]; then
+            continue
+        fi
         vlog "Probing: $target"
-        local header; header=$(curl -IsL --connect-timeout 2 --max-time 3 -A "$UA" "$target" 2>/dev/null | grep -Ei "Set-Cookie|Authorization|API-Key" | tr -d '\r' | tr '\n' ' ')
+        local header; header=$(curl -IsL --connect-timeout 2 --max-time 3 -A "$UA" -- "$target" 2>/dev/null | grep -Ei "Set-Cookie|Authorization|API-Key" | tr -d '\r' | tr '\n' ' ')
         if [[ -n "$header" ]]; then
-            sqlite3 "$DB_PATH" "INSERT INTO findings (mission_id, agent, url, data) VALUES ('$cid', 'INQUISITOR', '$target', '$header');"
+            python3 -c '
+import sqlite3, sys
+try:
+    with sqlite3.connect(sys.argv[1]) as conn:
+        conn.execute("INSERT INTO findings (mission_id, agent, url, data) VALUES (?, ?, ?, ?)", (sys.argv[2], "INQUISITOR", sys.argv[3], sys.argv[4]))
+except Exception as err:
+    raise RuntimeError("Failed to insert finding") from err
+' "$DB_PATH" "$cid" "$target" "$header"
         fi
     done < "$CASE_ROOT/$cid/intake/subs.txt"
 }
