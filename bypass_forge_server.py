@@ -175,6 +175,7 @@ def fire_technique(target_url, tech, timeout=8):
         "verdict": classify(code), "bytes": length,
     })
     with findings_lock:
+
         findings.append(result)
     return result
 
