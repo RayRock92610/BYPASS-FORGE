@@ -1,6 +1,7 @@
 import os
-import subprocess
 import sqlite3
+import subprocess
+
 
 def test_kfb1_optimization(tmp_path):
     # kfb1 overrides DB_PATH with $HOME/kessel-flow-system/...
