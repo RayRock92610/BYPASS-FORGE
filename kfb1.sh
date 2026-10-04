@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 # CALLSIGN: KFB1 | VERSION: 4.1.4-ELECTRIC
-# ADMIN: rayrock9261 | KEYS: 1987 / 7891
+# ADMIN: rayrock9261
 
 # --- RGB TRUECOLOR DEFINITIONS (ELECTRIC) ---
 RED='\033[38;2;255;49;49m'    # Electric Red
@@ -35,8 +35,8 @@ NC='\033[0m'
 set -e
 
 # --- CONFIG & PATHS ---
-ALPHA_KEY="1987"
-OMEGA_KEY="7891"
+ALPHA_KEY="${ALPHA_KEY:-}"
+OMEGA_KEY="${OMEGA_KEY:-}"
 DB_PATH="$HOME/kessel-flow-system/data/kessel_vault.db"
 CASE_ROOT="$HOME/forensic-cases"
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -50,6 +50,10 @@ init_db() {
 
 verify_admin() {
     clear
+    if [[ -z "$ALPHA_KEY" ]]; then
+        echo -e "${RED}[!] ERROR: ALPHA_KEY environment variable not set.${NC}"
+        exit 1
+    fi
     echo -e "${RED}[!] SYSTEM ENCRYPTED${NC}"
     echo -ne "${ORANGE}[?] ENTER ALPHA KEY: ${NC}"
     read -r input_key
@@ -80,6 +84,10 @@ deploy_ghost() {
 
 deploy_strikeforce() {
     local cid=$1
+    if [[ -z "$OMEGA_KEY" ]]; then
+        echo -e "${RED}[!] ERROR: OMEGA_KEY environment variable not set.${NC}"
+        return 1
+    fi
     echo -ne "${ORANGE}[?] ENTER OMEGA KEY TO RELEASE ZOO CREW: ${NC}"
     read -r o_key
     [[ "$o_key" != "$OMEGA_KEY" ]] && return 0
