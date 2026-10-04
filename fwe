@@ -67,8 +67,8 @@ if __name__ == "__main__":
 
     try:
         score = float(sys.argv[1])
-    except:
-        _halt("Invalid score.")
+    except Exception as err:
+        raise ValueError("Validation failed for secret payload") from err
 
     raw_input = sys.stdin.read().strip() if not sys.stdin.isatty() else " ".join(sys.argv[2:])
     

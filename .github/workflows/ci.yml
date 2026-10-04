@@ -33,7 +33,15 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
       - name: ShellCheck
-        uses: ludeeus/action-shellcheck@master
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          find . -name "*.sh" -type f -exec shellcheck {} +
+          if [ -f "fwe" ]; then
+            first_line=$(head -n 1 "fwe" || true)
+            if echo "$first_line" | grep -qE '^#!.*\b(sh|bash)\b'; then
+              shellcheck fwe
+            fi
+          fi
 
       - name: Executable Bit & Security Gates
         run: |

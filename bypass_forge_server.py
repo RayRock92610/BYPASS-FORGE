@@ -35,9 +35,10 @@ from collections import defaultdict
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 
-ssl_ctx = ssl.create_default_context()
+ssl_ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
 ssl_ctx.check_hostname = True
 ssl_ctx.verify_mode = ssl.CERT_REQUIRED
+ssl_ctx.load_default_certs()
 
 ALLOWED_ORIGIN  = "http://127.0.0.1:8080"
 RATE_LIMIT_REQ  = 20
