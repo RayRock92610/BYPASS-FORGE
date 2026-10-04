@@ -101,16 +101,28 @@ deploy_strikeforce() {
         vlog "Probing: $target"
         local header; header=$(curl -IsL --connect-timeout 2 --max-time 3 -A "$UA" -- "$target" 2>/dev/null | grep -Ei "Set-Cookie|Authorization|API-Key" | tr -d '\r' | tr '\n' ' ')
         if [[ -n "$header" ]]; then
-            python3 -c '
-import sqlite3, sys
-try:
-    with sqlite3.connect(sys.argv[1]) as conn:
-        conn.execute("INSERT INTO findings (mission_id, agent, url, data) VALUES (?, ?, ?, ?)", (sys.argv[2], "INQUISITOR", sys.argv[3], sys.argv[4]))
-except Exception as err:
-    raise RuntimeError("Failed to insert finding") from err
-' "$DB_PATH" "$cid" "$target" "$header"
+            printf "%s\t%s\t%s\n" "$cid" "$target" "$header" >> "$CASE_ROOT/$cid/intake/findings.tmp"
         fi
     done < "$CASE_ROOT/$cid/intake/subs.txt"
+
+    if [[ -f "$CASE_ROOT/$cid/intake/findings.tmp" ]]; then
+        python3 -c '
+import sqlite3, sys
+try:
+    with sqlite3.connect(sys.argv[1]) as conn, open(sys.argv[2]) as f:
+        data = []
+        for line in f:
+            if not line.strip(): continue
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) >= 3:
+                data.append((parts[0], "INQUISITOR", parts[1], parts[2]))
+        if data:
+            conn.executemany("INSERT INTO findings (mission_id, agent, url, data) VALUES (?, ?, ?, ?)", data)
+except Exception as err:
+    raise RuntimeError("Failed to batch insert findings") from err
+' "$DB_PATH" "$CASE_ROOT/$cid/intake/findings.tmp"
+        rm -f "$CASE_ROOT/$cid/intake/findings.tmp"
+    fi
 }
 
 deploy_bones() {
