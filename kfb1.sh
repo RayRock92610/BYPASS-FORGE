@@ -94,8 +94,12 @@ deploy_strikeforce() {
     echo -e "${RED}[*] AGENT INQUISITOR: Probing for API/Auth Leaks...${NC}"
     while read -r target; do
         [[ -z "$target" ]] && continue
+        # Validate target is a URL or domain/IP syntax to prevent command injection
+        if [[ ! "$target" =~ ^[a-zA-Z0-9.:/_-]+$ ]]; then
+            continue
+        fi
         vlog "Probing: $target"
-        local header; header=$(curl -IsL --connect-timeout 2 --max-time 3 -A "$UA" "$target" 2>/dev/null | grep -Ei "Set-Cookie|Authorization|API-Key" | tr -d '\r' | tr '\n' ' ')
+        local header; header=$(curl -IsL --connect-timeout 2 --max-time 3 -A "$UA" -- "$target" 2>/dev/null | grep -Ei "Set-Cookie|Authorization|API-Key" | tr -d '\r' | tr '\n' ' ')
         if [[ -n "$header" ]]; then
             python3 -c '
 import sqlite3, sys
