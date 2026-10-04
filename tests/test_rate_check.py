@@ -1,6 +1,9 @@
-import pytest
 from unittest.mock import patch
-from bypass_forge_server import rate_check, rate_table, RATE_LIMIT_REQ, RATE_LIMIT_WIN
+
+import pytest
+
+from bypass_forge_server import RATE_LIMIT_REQ, RATE_LIMIT_WIN, rate_check, rate_table
+
 
 @pytest.fixture(autouse=True)
 def reset_rate_table():
