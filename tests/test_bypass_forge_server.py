@@ -1,5 +1,5 @@
-from unittest.mock import MagicMock, patch
 import urllib.error
+from unittest.mock import MagicMock, patch
 
 from bypass_forge_server import classify, findings, fire_technique
 
