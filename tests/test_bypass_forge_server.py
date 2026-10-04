@@ -1,5 +1,6 @@
 from bypass_forge_server import BYPASS_TECHNIQUES, validate_techniques
 
+
 def test_validate_techniques_empty_list():
     assert validate_techniques([]) == []
 
