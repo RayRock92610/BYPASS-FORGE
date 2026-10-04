@@ -14,7 +14,7 @@ import subprocess
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice and this permission notice shall be included in
 # copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -31,7 +31,7 @@ from pathlib import Path
 def capture_local(source_file):
     # 1. Logic Gate: Find the browser
     chrome_path = shutil.which("chromium") or shutil.which("chromium-browser")
-    
+
     if not chrome_path:
         print("[!] Error: Chromium not found. Run: pkg install chromium")
         return
@@ -50,8 +50,12 @@ def capture_local(source_file):
     html_path = output_dir / "temp.html"
     html_content = f"""
     <html>
-    <body style="background: #0d1117; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh;">
-        <div style="background: #161b22; padding: 40px; border-radius: 12px; border: 1px solid #30363d; color: #c9d1d9; font-family: monospace; font-size: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+    <body style="background: #0d1117; margin: 0; display: flex; \
+        justify-content: center; align-items: center; height: 100vh;">
+        <div style="background: #161b22; padding: 40px; border-radius: 12px; \
+            border: 1px solid #30363d; color: #c9d1d9; \
+            font-family: monospace; \
+            font-size: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
             <pre style="margin: 0;">{code}</pre>
         </div>
     </body>
@@ -70,16 +74,18 @@ def capture_local(source_file):
         "--no-sandbox",
         f"--screenshot={out_path}",
         "--window-size=1280,720",
-        "--virtual-time-budget=10000", # Gives time for styles to load
+        "--virtual-time-budget=10000",  # Gives time for styles to load
         str(html_path.absolute())
     ]
 
     try:
         subprocess.run(cmd, check=True, capture_output=True)
         print(f"[+] SUCCESS: Image deployed to {out_path}")
-        if os.path.exists(html_path): os.remove(html_path)
+        if os.path.exists(html_path):
+            os.remove(html_path)
     except subprocess.CalledProcessError as e:
         print(f"[!] Forge Failed: {e.stderr.decode()}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
