@@ -5,6 +5,7 @@ from importlib.machinery import SourceFileLoader
 # Load the fwe script as a module
 fwe = SourceFileLoader("fwe", "fwe").load_module()
 
+
 class TestFWEEngine(unittest.TestCase):
     def setUp(self):
         # Provide a valid secret for testing
@@ -17,7 +18,9 @@ class TestFWEEngine(unittest.TestCase):
     def test_valid_initialization(self):
         config = fwe.FWEConfig()
         engine = fwe.FWEEngine(config)
-        self.assertEqual(engine.config.secret, "A_VALID_SECRET_THAT_IS_LONG_ENOUGH_12345")
+        self.assertEqual(
+            engine.config.secret, "A_VALID_SECRET_THAT_IS_LONG_ENOUGH_12345"
+        )
 
     def test_process_high_confidence(self):
         config = fwe.FWEConfig()
@@ -42,6 +45,7 @@ class TestFWEEngine(unittest.TestCase):
         with self.assertRaises(SystemExit):
             config = fwe.FWEConfig()
             fwe.FWEEngine(config)
+
 
 if __name__ == "__main__":
     unittest.main()

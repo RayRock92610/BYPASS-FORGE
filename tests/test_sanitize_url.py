@@ -15,11 +15,13 @@ def test_sanitize_url_empty_or_too_long():
     assert url is None
     assert err == "URL too long or empty"
 
+
 def test_sanitize_url_whitespace_stripping():
     # It must start with http/https but we check whitespace stripping
     url, err = sanitize_url("  http://example.com  ")
     assert url == "http://example.com"
     assert err is None
+
 
 def test_sanitize_url_invalid_scheme():
     url, err = sanitize_url("ftp://example.com")
@@ -29,6 +31,7 @@ def test_sanitize_url_invalid_scheme():
     url, err = sanitize_url("http ://example.com")
     assert url is None
     assert err == "Must start with http:// or https://"
+
 
 def test_sanitize_url_blocked_hosts():
     url, err = sanitize_url("http://localhost")
@@ -42,6 +45,7 @@ def test_sanitize_url_blocked_hosts():
     url, err = sanitize_url("http://0.0.0.0:8080/")
     assert url is None
     assert err == "Blocked host: 0.0.0.0"
+
 
 def test_sanitize_url_private_ips():
     url, err = sanitize_url("http://10.0.0.1/admin")
@@ -60,11 +64,13 @@ def test_sanitize_url_private_ips():
     assert url is None
     assert err == "Private IP range blocked"
 
+
 def test_sanitize_url_control_chars():
     # \x00 is a control char.
     url, err = sanitize_url("http://example.com/\x00test")
     assert url == "http://example.com/test"
     assert err is None
+
 
 def test_sanitize_url_valid():
     url, err = sanitize_url("https://example.com/path?q=1")
