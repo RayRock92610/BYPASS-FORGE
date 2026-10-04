@@ -1,6 +1,5 @@
 import os
 import unittest
-import sys
 from importlib.machinery import SourceFileLoader
 
 # Load the fwe script as a module
